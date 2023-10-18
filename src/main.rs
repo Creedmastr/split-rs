@@ -12,34 +12,34 @@ mod utils;
 fn main() {
     let args: Vec<String> = std::env::args().collect();
 
-    if args.len() < 3 {
+    if args.len() < 4 {
         panic!("ERROR: Wrong number of arguments")
     };
 
-    match &args[2] {
+    match &args[1] {
         x if x == "split" => {
-            if args.len() < 4 {
+            if args.len() < 5 {
                 panic!("ERROR: Wrong number of arguments")
             };
 
-            let f = fs::read(&args[1]).unwrap();
+            let f = fs::read(&args[2]).unwrap();
             let slice_number: usize = args[3].parse().unwrap();
 
             let splitted = split_vec(f.clone(), slice_number);
 
-            if !fs::try_exists("./out/").unwrap() {
-                let _ = fs::DirBuilder::new().create("./out/");
+            if !fs::try_exists(&args[4]).unwrap() { 
+                let _ = fs::DirBuilder::new().create(&args[4]);
             }
 
             for (i, u) in splitted.iter().enumerate() {
                 let file_name =
                     chrono::Local::now().naive_local().to_string() + "  n" + &i.to_string();
-                let _ = fs::write(format!("./out/{}", file_name), u);
+                let _ = fs::write(format!("./{}/{}", &args[4], file_name), u);
             }
         }
 
         x if x == "build" => {
-            let paths = fs::read_dir("./out/").unwrap();
+            let paths = fs::read_dir(&args[2]).unwrap();
             let mut splitted = vec![];
             let mut sorted_path = vec![];
             let mut current_lowest: u8 = 0;
@@ -76,8 +76,8 @@ fn main() {
 
             let splitted = join_vec(splitted);
 
-            let _ = fs::write("out.out", splitted);
-            let _ = fs::set_permissions("out.out", Permissions::from_mode(0o755));
+            let _ = fs::write(&args[3], splitted);
+            let _ = fs::set_permissions(&args[3], Permissions::from_mode(0o755));
         }
 
         _ => panic!("ERROR: Wrong usage"),
